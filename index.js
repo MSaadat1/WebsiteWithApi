@@ -5,11 +5,17 @@ const imagePath = "https://image.tmdb.org/t/p/w1280/";
 
 const main = document.getElementById("main");
 const favorite = document.getElementById("favorite");
+const buttonAsc = document.querySelector('button[data-sort="asc"]');
+const buttonDesc = document.querySelector('button[data-sort="desc"]');
+const sortBtns = document.querySelectorAll(".sortBtn");
 
 getMovies(AppUrl);
+const movieData = [];
+
 async function getMovies(url) {
   const res = await fetch(url);
   const data = await res.json();
+  movieData.push(...data.results);
   displayMovies(data.results);
   console.log(data.results);
 }
@@ -31,6 +37,13 @@ function createMovieElement(movie) {
     </div>
   `;
 
+  const voteTotal = movieData.reduce((total, item) => {
+    return total + item.vote_average;
+  }, 0);
+
+  const sumDisplay = document.getElementById("sumDisplay");
+  sumDisplay.textContent = `Total Vote: ${voteTotal.toFixed(2)}`;
+
   const favoriteButton = movieElement.querySelector(".favorite-button");
   favoriteButton.addEventListener("click", () => toggleFavorite(movieElement));
 
@@ -46,13 +59,11 @@ function displayMovies(movies) {
 }
 
 function toggleFavorite(movieElement) {
-  if (movieElement.parentElement === favorite) {
-    removeFromFavorites(movieElement);
-    sortMoviesAlphabetically(main);
-  } else {
-    addToFavorites(movieElement);
-    sortMoviesAlphabetically(favorite);
-  }
+  const params =
+    movieElement.parentElement === favorite
+      ? [removeFromFavorites, main]
+      : [addToFavorites, favorite];
+  params[0](movieElement);
 }
 
 function addToFavorites(movieElement) {
@@ -63,16 +74,24 @@ function removeFromFavorites(movieElement) {
   main.appendChild(movieElement);
 }
 
-function sortMoviesAlphabetically(section) {
-  const movies = Array.from(section.children);
-  movies.sort((a, b) => {
-    const titleA = a.querySelector("h3").innerText.toUpperCase();
-    const titleB = b.querySelector("h3").innerText.toUpperCase();
-    if (titleA < titleB) return -1;
-    if (titleA > titleB) return 1;
-    return 0;
-  });
-  section.innerHTML = "";
-  movies.forEach((movie) => section.appendChild(movie));
-}
+sortBtns.forEach((btn) => {
+  btn.addEventListener("click", async (e) => {
+    const target = e.target;
+    const containerToSort =
+      target.dataset.container === "favorite" ? favorite : main;
+    const items = containerToSort.querySelectorAll(".movie");
+    const direction = target.dataset.sort;
 
+    const sortedData = Array.from(items).sort((a, b) => {
+      const valOne = a.getElementsByTagName("h3")[0].innerText;
+      const valTwo = b.getElementsByTagName("h3")[0].innerText;
+      if (valOne > valTwo) return direction === "asc" ? 1 : -1;
+      else if (valOne < valTwo) return direction === "asc" ? -1 : 1;
+      else return 0;
+    });
+
+    sortedData.forEach((movie) => {
+      containerToSort.append(movie);
+    });
+  });
+});

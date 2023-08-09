@@ -5,7 +5,7 @@
 body{
 background-color: black;
 font-family: sans-serif;
-margin: 0;
+margin: 0 ;
 }
 
 h1,h2{
@@ -17,10 +17,23 @@ h2{
     font-size: 32px;
 }
 
+.sortBtn{
+  margin: 20px 30px;
+  padding: 5px 15px;
+  color: white; 
+  background-color: #9b0e0d;
+  border: none;
+  border-radius: 3px; 
+}
 
+#sumDisplay{
+    color: white;
+    margin-left: 30px;
+}
 section{
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .movie{
